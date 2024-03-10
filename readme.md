@@ -27,6 +27,8 @@
 
   <h3 align="center">Game Night Discord Bot</h3>
 
+</div>
+
 
 
 <!-- TABLE OF CONTENTS -->
