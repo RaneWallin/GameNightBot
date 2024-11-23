@@ -1,7 +1,11 @@
 # This example requires the 'message_content' intent.
 
 import discord
-import my_secrets
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv('.env')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -18,7 +22,7 @@ async def on_message(message):
         return
 
     if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+        await message.channel.send('Hello! Hello!')
 
-client.run(my_secrets.DISCORD_TOKEN)
+client.run(os.environ['DISCORD_TOKEN'])
 
