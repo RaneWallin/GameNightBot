@@ -1,6 +1,8 @@
 import discord
 from discord import Interaction, ui, SelectOption
 from helpers.supa_helpers import search_games_fuzzy, get_sessions_for_game
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
+
 
 class SessionGameSelect(ui.Select):
     def __init__(self, games):
@@ -48,6 +50,7 @@ class SessionSelectView(ui.View):
 
 async def handle_list_sessions(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
+    query = sanitize_query_input(query)
 
     try:
         games = search_games_fuzzy(query)

@@ -2,6 +2,7 @@ import aiohttp
 import xml.etree.ElementTree as ET
 from discord import Interaction, SelectOption, ui
 from helpers.supa_helpers import get_game_by_bgg_id, get_users_with_game, get_users_by_ids
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
 class GameDropdown(ui.Select):
@@ -43,6 +44,8 @@ class GameDropdownView(ui.View):
 
 async def handle_find_game(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
+    query = sanitize_query_input(query)
+    query = escape_query_param(query)
 
     search_url = f"https://boardgamegeek.com/xmlapi2/search?query={query}&type=boardgame"
 

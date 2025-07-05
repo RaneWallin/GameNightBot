@@ -2,9 +2,13 @@ import aiohttp
 import xml.etree.ElementTree as ET
 from discord import Interaction, ui, SelectOption, Embed, ButtonStyle
 from helpers.supa_helpers import get_or_create_game, get_or_create_user, user_has_game, link_user_game
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
 async def fetch_bgg_search(query: str):
+    query = sanitize_query_input(query)
+    query = escape_query_param(query)
+    
     url = f"https://boardgamegeek.com/xmlapi2/search?query={query}&type=boardgame"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:

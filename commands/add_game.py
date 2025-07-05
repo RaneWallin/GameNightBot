@@ -7,9 +7,13 @@ from helpers.supa_helpers import (
     user_has_game,
     link_user_game,
 )
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
+
 
 async def handle_add_game(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
+    query = sanitize_query_input(query)
+    query = escape_query_param(query)
 
     search_url = f"https://boardgamegeek.com/xmlapi2/search?query={query}&type=boardgame"
     try:

@@ -7,6 +7,8 @@ from helpers.supa_helpers import (
     get_users_in_session,
     link_user_to_session
 )
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
+
 
 class GameSelect(ui.Select):
     def __init__(self, games, session_name: str | None, session_date: str | None):
@@ -41,6 +43,7 @@ class GameSelectView(ui.View):
 
 async def handle_create_session(interaction: Interaction, query: str, session_name: str = None, session_date: str = None):
     await interaction.response.defer(ephemeral=True)
+    query = sanitize_query_input(query)
 
     games = search_games_fuzzy(query)
     if not games:

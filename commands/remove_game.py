@@ -2,10 +2,12 @@
 
 from discord import Interaction, ui, SelectOption
 from helpers.supa_helpers import get_user_by_discord_id, get_user_games, remove_game_link
+from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 async def handle_remove_game(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
     discord_id = int(interaction.user.id)
+    query = sanitize_query_input(query)
 
     # Step 1: Get the user's info
     user = get_user_by_discord_id(discord_id)
