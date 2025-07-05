@@ -1,6 +1,10 @@
 import discord
 from discord import Interaction, ui, SelectOption
-from helpers.supa_helpers import get_all_registered_users, get_users_in_session, link_user_to_session
+from helpers.supa_helpers import (
+    get_all_registered_users,
+    get_users_in_session,
+    link_user_to_session,
+)
 
 class UserSelect(ui.Select):
     def __init__(self, session_id: int, options: list[SelectOption]):
@@ -9,16 +13,28 @@ class UserSelect(ui.Select):
             placeholder="Select users to add to this session",
             min_values=1,
             max_values=len(options),
-            options=options
+            options=options,
         )
 
     async def callback(self, interaction: Interaction):
         selected_ids = [int(uid) for uid in self.values]
+        added = 0
+        failed = 0
+
         for user_id in selected_ids:
-            link_user_to_session(self.session_id, user_id)
+            try:
+                link_user_to_session(self.session_id, user_id)
+                added += 1
+            except Exception as e:
+                failed += 1  # You could log e for debugging
+
+        msg = f"✅ Added {added} user(s) to the session."
+        if failed > 0:
+            msg += f" ⚠️ Failed to add {failed} user(s)."
+
         await interaction.response.edit_message(
-            content="✅ Users successfully added to the session!",
-            view=None
+            content=msg,
+            view=None,
         )
 
 class UserSelectView(ui.View):
@@ -29,10 +45,13 @@ class UserSelectView(ui.View):
 async def handle_add_session_users(interaction: Interaction, session_id: int):
     await interaction.response.defer(ephemeral=True)
 
-    all_users = get_all_registered_users()
-    already_linked = [u["user_id"] for u in get_users_in_session(session_id)]
+    try:
+        all_users = get_all_registered_users()
+        already_linked = [u["user_id"] for u in get_users_in_session(session_id)]
+    except Exception as e:
+        await interaction.followup.send("❌ Failed to retrieve users.", ephemeral=True)
+        return
 
-    # Filter out already linked users
     eligible_users = [u for u in all_users if u["id"] not in already_linked]
 
     if not eligible_users:
@@ -42,9 +61,13 @@ async def handle_add_session_users(interaction: Interaction, session_id: int):
     options = [
         SelectOption(
             label=u["nickname"] if u["nickname"] else u["username"],
-            value=str(u["id"])
-        ) for u in eligible_users[:25]  # Discord max is 25
+            value=str(u["id"]),
+        ) for u in eligible_users[:25]  # Discord limit
     ]
+
+    if not options:
+        await interaction.followup.send("❌ No eligible users to display.", ephemeral=True)
+        return
 
     view = UserSelectView(session_id, options)
     await interaction.followup.send("👥 Select users to add to the session:", view=view, ephemeral=True)

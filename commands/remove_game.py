@@ -7,14 +7,15 @@ async def handle_remove_game(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
     discord_id = int(interaction.user.id)
 
-    # Step 1: Get user info
+    # Step 1: Get the user's info
     user = get_user_by_discord_id(discord_id)
     if not user:
-        await interaction.followup.send("❌ You don't have any games to remove.", ephemeral=True)
+        await interaction.followup.send("❌ You're not registered or don't have any games yet.", ephemeral=True)
         return
+
     user_id = user["id"]
 
-    # Step 2: Get user's games
+    # Step 2: Search user's collection for matching games
     user_games = get_user_games(user_id)
     matching_games = [g for g in user_games if query.lower() in g["name"].lower()]
 
@@ -22,13 +23,14 @@ async def handle_remove_game(interaction: Interaction, query: str):
         await interaction.followup.send("❌ No matching games found in your collection.", ephemeral=True)
         return
 
+    # Step 3: Remove immediately if only one match
     if len(matching_games) == 1:
         selected_game = matching_games[0]
         remove_game_link(user_id, selected_game["id"])
         await interaction.followup.send(f"🗑️ Removed **{selected_game['name']}** from your collection.", ephemeral=True)
         return
 
-    # Step 3: Prompt user to choose one if multiple
+    # Step 4: Ask user to choose which game to remove
     options = [SelectOption(label=g["name"], value=str(g["id"])) for g in matching_games[:10]]
 
     class RemoveDropdown(ui.Select):
@@ -45,4 +47,4 @@ async def handle_remove_game(interaction: Interaction, query: str):
             super().__init__(timeout=60)
             self.add_item(RemoveDropdown())
 
-    await interaction.followup.send("Which game would you like to remove?", view=RemoveView(), ephemeral=True)
+    await interaction.followup.send("🧹 Multiple matches found. Which game would you like to remove?", view=RemoveView(), ephemeral=True)

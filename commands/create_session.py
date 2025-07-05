@@ -1,31 +1,41 @@
 import discord
-from discord import Interaction, ui, SelectOption, app_commands
-from helpers.supa_helpers import search_games_fuzzy, create_session_entry, get_all_registered_users, link_user_to_session
+from discord import Interaction, ui, SelectOption
+from helpers.supa_helpers import (
+    search_games_fuzzy,
+    create_session_entry,
+    get_all_registered_users,
+    get_users_in_session,
+    link_user_to_session
+)
 
 class GameSelect(ui.Select):
-    def __init__(self, games, session_name, session_date):
+    def __init__(self, games, session_name: str | None, session_date: str | None):
         self.session_name = session_name
         self.session_date = session_date
         options = [SelectOption(label=game["name"], value=str(game["id"])) for game in games]
-        super().__init__(placeholder="Select the game for this session", options=options)
+        super().__init__(
+            placeholder="Select the game for this session",
+            options=options,
+        )
 
     async def callback(self, interaction: Interaction):
         game_id = int(self.values[0])
         session = create_session_entry(game_id, name=self.session_name, date=self.session_date)
 
         if session:
-            # Prompt to add users after confirming session creation
             view = build_user_select_view(session["id"])
             await interaction.response.edit_message(
-                content=f"✅ Session for **{self.session_name or session['name_id']}** on **{self.session_date}** created!\n\n👥 Now select players for the session:",
+                content=f"✅ Session for **{self.session_name or session['name_id']}** on **{self.session_date or 'unspecified date'}** created!\n\n👥 Now select players for the session:",
                 view=view
             )
         else:
-            await interaction.response.edit_message(content="❌ Failed to create session.", view=None)
-
+            await interaction.response.edit_message(
+                content="❌ Failed to create session.",
+                view=None
+            )
 
 class GameSelectView(ui.View):
-    def __init__(self, games, session_name, session_date):
+    def __init__(self, games, session_name: str | None, session_date: str | None):
         super().__init__(timeout=60)
         self.add_item(GameSelect(games, session_name, session_date))
 
@@ -42,12 +52,15 @@ async def handle_create_session(interaction: Interaction, query: str, session_na
 
 def build_user_select_view(session_id: int):
     users = get_all_registered_users()
+    already_linked = {u["user_id"] for u in get_users_in_session(session_id)}
+    eligible_users = [u for u in users if u["id"] not in already_linked]
+
     options = [
         SelectOption(
             label=u["nickname"] if u["nickname"] else u["username"],
             value=str(u["id"])
         )
-        for u in users[:25]  # Discord max is 25 options
+        for u in eligible_users[:25]  # Discord limit
     ]
 
     class UserSelect(ui.Select):
@@ -61,15 +74,23 @@ def build_user_select_view(session_id: int):
 
         async def callback(self, interaction: Interaction):
             selected_ids = [int(uid) for uid in self.values]
+            added = 0
             for user_id in selected_ids:
-                link_user_to_session(session_id, user_id)
+                try:
+                    link_user_to_session(session_id, user_id)
+                    added += 1
+                except Exception:
+                    pass  # optionally log
+
             await interaction.response.edit_message(
-                content="✅ Users added to the session!", view=None
+                content=f"✅ Added {added} user(s) to the session!",
+                view=None
             )
 
     class UserSelectView(ui.View):
         def __init__(self):
             super().__init__(timeout=60)
-            self.add_item(UserSelect())
+            if options:
+                self.add_item(UserSelect())
 
     return UserSelectView()
