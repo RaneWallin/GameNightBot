@@ -1,159 +1,112 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a name="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+# 🌪 Squire
 
+Squire is a Discord bot designed to help communities manage board game collections, track play sessions, and coordinate game nights. It integrates with [BoardGameGeek](https://boardgamegeek.com) for game data and uses [Supabase](https://supabase.io) as its backend.
 
+---
 
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
+## 📦 Features
 
+* 🔍 Search and add games from BGG
+* 🎯 Find out who owns a game
+* 📚 View and manage your collection
+* 📝 Log play sessions
+* 👥 Track session participants
+* 🧠 Get game info with images and stats
 
+---
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
+## ✨ Installation
 
-  <h3 align="center">Game Night Discord Bot</h3>
+### 1. Clone the Repository
 
-</div>
+```bash
+git clone https://github.com/yourusername/game-night-bot.git
+cd game-night-bot
+```
 
+### 2. Set Up a Virtual Environment
 
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+### 3. Install Dependencies
 
+```bash
+pip install -r requirements.txt
+```
 
+### 4. Set Up `.env`
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+Create a `.env` file in the root directory with the following contents:
 
-This bot is to help you plan your game nights with your friends and family. It lets you schedule events, create and manage leaderboards, and create game lists to keep track of who own which games.
+```env
+DISCORD_TOKEN=your_discord_bot_token
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-service-role-key
+GUILD_ID=your_discord_guild_id
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+---
 
+## 🔑 Where to Find Supabase Keys
 
+1. Go to [app.supabase.com](https://app.supabase.com) and open your project.
+2. Navigate to **Settings > API**:
 
-### Built With
+   * **SUPABASE\_URL** is your project’s URL (e.g., `https://abcxyz.supabase.co`)
+   * **SUPABASE\_KEY** is the **Service Role** key (⚠️ Keep this secret and secure)
+3. Copy both and paste them into your `.env` file.
 
-* Python 3
-* MongoDB
-* discord.py
+---
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 🛠 Running the Bot
 
+```bash
+python bot.py
+```
 
+You should see:
 
-<!-- GETTING STARTED -->
-## Getting Started
+```
+🤖 Logged in as GameNightBot | Synced to guild 1234567890
+```
 
+---
 
-### Prerequisites
+## 📚 Command Highlights
 
+| Command              | Description                            |
+| -------------------- | -------------------------------------- |
+| `/register_user`     | Register yourself in the system        |
+| `/add_game`          | Add a game from BGG to your collection |
+| `/find_game`         | See who owns a specific game           |
+| `/my_games`          | View your collection                   |
+| `/remove_game`       | Remove a game from your collection     |
+| `/create_session`    | Log a game night session               |
+| `/add_session_users` | Add users to a session (UI-based)      |
+| `/list_sessions`     | List sessions where a game was played  |
+| `/game_info`         | View BGG details and add the game      |
 
-### Installation
+---
 
+## 🧪 Optional: Run the API for Web Integration
 
+This bot is structured to allow reuse of logic in a web interface. You can set up a FastAPI backend to expose functionality via HTTP.
 
-<!-- USAGE EXAMPLES -->
-## Usage
+(Ask in the issues if you'd like a scaffold for this!)
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+---
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+## 💡 Tips
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+* You must register before using most commands (`/register_user`)
+* Only games in the Supabase database can be linked or played
+* `/add_game` uses BGG’s XML API, so search results may vary slightly
 
+---
 
+## 📟 License
 
-<!-- ROADMAP -->
-## Roadmap
-
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+MIT License © 2025 Rane Wallin
