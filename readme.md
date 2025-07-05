@@ -20,7 +20,7 @@ Squire is a Discord bot designed to help communities manage board game collectio
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/game-night-bot.git
+git clone https://github.com/RaneWallin/GameNightBot.git
 cd game-night-bot
 ```
 
@@ -88,14 +88,6 @@ You should see:
 | `/add_session_users` | Add users to a session (UI-based)      |
 | `/list_sessions`     | List sessions where a game was played  |
 | `/game_info`         | View BGG details and add the game      |
-
----
-
-## 🧪 Optional: Run the API for Web Integration
-
-This bot is structured to allow reuse of logic in a web interface. You can set up a FastAPI backend to expose functionality via HTTP.
-
-(Ask in the issues if you'd like a scaffold for this!)
 
 ---
 
