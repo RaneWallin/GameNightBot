@@ -2,7 +2,7 @@ import aiohttp
 import xml.etree.ElementTree as ET
 from discord import Interaction, ui, ButtonStyle
 from helpers.supa_helpers import (
-    get_or_create_user,
+    get_user_by_discord_id,
     get_or_create_game,
     user_has_game,
     link_user_game,
@@ -11,6 +11,12 @@ from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
 async def handle_add_game(interaction: Interaction, query: str):
+    user = get_user_by_discord_id(interaction.user.id)
+
+    if not user:
+        await interaction.followup.send("❌ User is not registered. Try using /register_user.", ephemeral=True)
+        return 
+
     await interaction.response.defer(ephemeral=True)
     query = sanitize_query_input(query)
     query = escape_query_param(query)
@@ -62,7 +68,7 @@ async def handle_add_game(interaction: Interaction, query: str):
 
             bgg_id, name, _ = game_options[self.index]
             await button_interaction.response.edit_message(content=f"✅ You selected **{name}**", view=None)
-            await process_selected_game(interaction, bgg_id)
+            await process_selected_game(interaction, bgg_id, user.data[0]["id"])
 
     class GameButtonView(ui.View):
         def __init__(self):
@@ -73,7 +79,7 @@ async def handle_add_game(interaction: Interaction, query: str):
     view = GameButtonView()
     await interaction.followup.send("🔍 Select the game you want to add:", view=view, ephemeral=True)
 
-async def process_selected_game(interaction: Interaction, bgg_id: int):
+async def process_selected_game(interaction: Interaction, bgg_id: int, user_id: int):
     thing_url = f"https://boardgamegeek.com/xmlapi2/thing?id={bgg_id}&stats=1"
     try:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:

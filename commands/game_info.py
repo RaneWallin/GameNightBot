@@ -1,7 +1,7 @@
 import aiohttp
 import xml.etree.ElementTree as ET
 from discord import Interaction, ui, SelectOption, Embed, ButtonStyle
-from helpers.supa_helpers import get_or_create_game, get_or_create_user, user_has_game, link_user_game
+from helpers.supa_helpers import get_or_create_game, get_user_by_discord_id, user_has_game, link_user_game
 from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
@@ -113,7 +113,13 @@ async def handle_game_info(interaction: Interaction, query: str):
                     super().__init__(label="Add to My Collection", style=ButtonStyle.success)
 
                 async def callback(self, button_interaction: Interaction):
-                    user_id = get_or_create_user(button_interaction.user)
+                    user = get_user_by_discord_id(button_interaction.user.id)
+
+                    if user:
+                        user_id = user.data[0]["id"]
+                    else:
+                        await button_interaction.response.send_message("User is not registered. Please use /register_user.")
+                        return
 
                     if user_has_game(user_id, game_id):
                         await button_interaction.response.send_message("✅ Already in your collection.", ephemeral=True)
