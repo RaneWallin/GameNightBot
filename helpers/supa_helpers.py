@@ -193,3 +193,14 @@ def link_user_to_session(session_id: int, user_id: int):
 def get_users_in_session(session_id: int) -> List[Dict[str, Any]]:
     result = supabase.table("sessions_users").select("user_id").eq("session_id", session_id).execute()
     return result.data or []
+
+def link_winner_to_session(session_id: int, user_id: int):
+    # Assuming 'supabase' is a pre-configured Supabase client
+    supabase.from_("sessions_winners").insert({"session_id": session_id, "user_id": user_id}).execute()
+
+def get_session_by_id(session_id: int):
+    return supabase.from_("sessions").select("*").eq("id", session_id).single()
+
+def get_winners_in_session(session_id: int) -> List[Dict[str, Any]]:
+    result = supabase.table("sessions_winners").select("user_id").eq("session_id", session_id).execute()
+    return result.data or []

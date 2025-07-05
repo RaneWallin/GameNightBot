@@ -40,6 +40,7 @@ from commands.create_session import handle_create_session
 from commands.list_sessions import handle_list_sessions
 from commands.game_info import handle_game_info
 from commands.add_session_users import handle_add_session_users
+from commands.add_winners import handle_add_session_winners
 
 @bot.event
 async def on_ready():
@@ -100,6 +101,11 @@ async def game_info(interaction: Interaction, query: str):
 @app_commands.describe(session_id="ID of the session")
 async def add_session_users(interaction: Interaction, session_id: int):
     await handle_add_session_users(interaction, session_id)
+
+@bot.tree.command(name="add_winner", description="Add winners to a session", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(session_id="ID of the session")
+async def add_winner(interaction: Interaction, session_id: int):
+    await handle_add_session_winners(interaction, session_id)
 
 # Safely start the bot
 try:
