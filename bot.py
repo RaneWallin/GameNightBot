@@ -44,25 +44,28 @@ from commands.add_session_users import handle_add_session_users
 @bot.event
 async def on_ready():
     try:
-        await bot.tree.sync()
+        if IS_PROD:
+            print("In production, syncing all commands.")
+            await bot.tree.sync()
+        await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
         logger.info(f"🤖 Logged in as {bot.user} | Synced commands to guild {GUILD_ID}")
     except Exception as e:
         logger.error(f"Failed to sync commands: {e}")
 
 # Register commands with guild scoping
-@bot.tree.command(name="find_game", description="Find out who owns a game", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
-@app_commands.describe(query="The name of the game to search")
-async def find_game(interaction: Interaction, query: str):
-    await handle_find_game(interaction, query)
+@bot.tree.command(name="who_game", description="Find out who owns a game", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(game="The name of the game to search")
+async def who_game(interaction: Interaction, game: str):
+    await handle_find_game(interaction, game)
 
 @bot.tree.command(name="add_game", description="Search and add a board game from BGG", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
 @app_commands.describe(query="The name of the game to search")
 async def add_game(interaction: Interaction, query: str):
     await handle_add_game(interaction, query)
 
-@bot.tree.command(name="my_games", description="Show your board game collection", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
-async def my_games(interaction: Interaction):
-    await handle_my_games(interaction)
+@bot.tree.command(name="owned_games", description="Show your board game collection", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+async def owned_games(interaction: Interaction,  user: discord.User = None):
+    await handle_my_games(interaction, user)
 
 @bot.tree.command(name="remove_game", description="Remove a game from your collection", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
 @app_commands.describe(query="The name of the game to search")

@@ -24,10 +24,13 @@ class GamePagination(ui.View):
         else:
             await interaction.response.defer()
 
-async def handle_my_games(interaction: Interaction):
+async def handle_my_games(interaction: Interaction, user: discord.User = None):
     await interaction.response.defer(ephemeral=True)
 
-    user_id = get_user_id_by_discord(int(interaction.user.id))
+    if user is None:
+        user = interaction.user
+
+    user_id = get_user_id_by_discord(int(user.id))
     if not user_id:
         await interaction.followup.send("❌ You aren't registered yet. Use `/register_user` to begin.", ephemeral=True)
         return
