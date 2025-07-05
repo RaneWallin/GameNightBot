@@ -11,10 +11,10 @@ from config import SUPABASE_URL, SUPABASE_KEY
 load_dotenv()
 
 # Validate environment variables
-REQUIRED_ENV_VARS = ["SUPABASE_URL", "SUPABASE_KEY"]
-for var in REQUIRED_ENV_VARS:
-    if not os.getenv(var):
-        raise EnvironmentError(f"Missing required environment variable: {var}")
+# REQUIRED_ENV_VARS = ["SUPABASE_URL", "SUPABASE_KEY"]
+# for var in REQUIRED_ENV_VARS:
+#     if not os.getenv(var):
+#         raise EnvironmentError(f"Missing required environment variable: {var}")
 
 # Initialize client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY, options=ClientOptions(schema="public"))

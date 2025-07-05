@@ -68,7 +68,7 @@ async def handle_add_game(interaction: Interaction, query: str):
 
             bgg_id, name, _ = game_options[self.index]
             await button_interaction.response.edit_message(content=f"✅ You selected **{name}**", view=None)
-            await process_selected_game(interaction, bgg_id, user.data[0]["id"])
+            await process_selected_game(interaction, bgg_id, user["id"])
 
     class GameButtonView(ui.View):
         def __init__(self):
@@ -104,7 +104,6 @@ async def process_selected_game(interaction: Interaction, bgg_id: int, user_id: 
     publisher = next((e.get("value") for e in game.findall("link") if e.get("type") == "boardgamepublisher"), "")
     designer = next((e.get("value") for e in game.findall("link") if e.get("type") == "boardgamedesigner"), "")
 
-    user_id = get_or_create_user(interaction.user)
     game_id = get_or_create_game(bgg_id, {
         "name": name,
         "publisher": publisher,
