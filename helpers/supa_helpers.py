@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from thefuzz import fuzz
 from supabase import create_client, Client
 from supabase.lib.client_options import ClientOptions
+from config import SUPABASE_URL, SUPABASE_KEY
+
 
 # Load .env config
 load_dotenv()
