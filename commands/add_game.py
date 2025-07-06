@@ -53,7 +53,11 @@ async def handle_add_game(interaction: Interaction, query: str):
         name = name_tag.get("value") if name_tag is not None else "Unknown Game"
         year_tag = item.find("yearpublished")
         year = year_tag.get("value") if year_tag is not None else "N/A"
-        label = f"{name} ({year})"
+
+        max_name_length = 80 - len(f" ({year})")
+        trimmed_name = name[:max_name_length - 1] + "…" if len(name) > max_name_length else name
+        label = f"{trimmed_name} ({year})"
+
         game_options.append((bgg_id, name, label))
 
     class GameButton(ui.Button):
