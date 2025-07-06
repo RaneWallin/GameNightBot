@@ -30,7 +30,7 @@ async def handle_my_games(interaction: Interaction, user: discord.User = None):
     if user is None:
         user = interaction.user
 
-    db_user = get_user_by_discord_id(int(user.id))
+    db_user = get_user_by_discord_id(int(user.id), interaction.guild_id)
 
     if not db_user:
         await interaction.followup.send("❌ You aren't registered yet. Use `/register_user` to begin.", ephemeral=True)
