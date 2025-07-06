@@ -38,14 +38,14 @@ def get_user_by_discord_id(discord_id: int, server_id=None) -> Optional[Dict[str
     if server_id:
         try:
             result = (
-                supabase.table("users_servers")
-                .select("users(id, username, nickname, discord_id)")
-                .eq("server_id", server_id)
-                .eq("users.discord_id", discord_id)
+                supabase.table("users")
+                .select("id, username, nickname, discord_id, users_servers!inner(server_id)")
+                .eq("discord_id", discord_id)
+                .eq("users_servers.server_id", server_id)
                 .single()
                 .execute()
             )
-            return result.data["users"]
+            return result.data
         except Exception:
             return None
     else:
