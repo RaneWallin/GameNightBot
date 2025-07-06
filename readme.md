@@ -69,12 +69,21 @@ Uses OpenAI to answer questions about game rules (⚠️ AI generated, may be in
 * `.env` file with:
 
   ```
-  DISCORD_TOKEN=your_discord_token
-  GUILD_ID=your_guild_id
-  GUILD_ID_2=your_secondary_guild_id (optional)
-  SUPABASE_URL=your_supabase_url
-  SUPABASE_KEY=your_supabase_key
-  OPENAI_API_KEY=your_openai_key
+   DISCORD_TOKEN_DEV=12345
+   DISCORD_TOKEN_PROD=6789
+
+   SUPABASE_URL_PROD=https://your_project_url.supabase.co
+   SUPABASE_KEY_PROD=12345
+
+   SUPABASE_URL_DEV=https://your_dev_project_url.supabase.co
+   SUPABASE_KEY_DEV=56789
+
+   OPEN_AI_DEV_KEY=12345
+   OPEN_AI_PROD_KEY=56789
+
+   GUILD_ID=your_discord_server_id
+   GUILD_ID_2=your_discord_server_id
+
   ENV=prod|dev
   ```
 
