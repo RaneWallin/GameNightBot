@@ -181,8 +181,14 @@ def create_session_entry(game_id: int, server_id: int, name: Optional[str] = Non
     result = supabase.table("sessions").insert(data).execute()
     return result.data[0] if result.data else None
 
-def get_sessions_for_game(game_id: int) -> List[Dict[str, Any]]:
-    result = supabase.table("sessions").select("*").eq("game_id", game_id).order("date", desc=True).execute()
+def get_sessions_for_game(game_id: int, server_id: int) -> List[Dict[str, Any]]:
+    result = (supabase.table("sessions")
+              .select("*")
+              .eq("game_id", game_id)
+              .eq("server_id", server_id)
+              .order("date", desc=True)
+              .execute()
+    )
     return result.data or []
 
 def link_user_to_session(session_id: int, user_id: int):

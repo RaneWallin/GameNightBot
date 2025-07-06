@@ -20,7 +20,7 @@ class SessionGameSelect(ui.Select):
     async def callback(self, interaction: Interaction):
         game_id = int(self.values[0])
         try:
-            sessions = get_sessions_for_game(game_id)
+            sessions = get_sessions_for_game(game_id, interaction.guild_id)
         except Exception as e:
             await interaction.response.edit_message(
                 content=f"❌ Failed to fetch sessions: {str(e)}", view=None
