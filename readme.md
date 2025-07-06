@@ -2,100 +2,123 @@
 
 Squire is a Discord bot designed to help communities manage board game collections, track play sessions, and coordinate game nights. It integrates with [BoardGameGeek](https://boardgamegeek.com) for game data and uses [Supabase](https://supabase.io) as its backend.
 
----
+## Features
 
-## 📦 Features
+* Register users to the server
+* Search and add games from BGG
+* View your personal or others' game collections
+* Create and log game sessions
+* Add session participants and winners
+* Ask AI questions about game rules
 
-* 🔍 Search and add games from BGG
-* 🎯 Find out who owns a game
-* 📚 View and manage your collection
-* 📝 Log play sessions
-* 👥 Track session participants
-* 🧠 Get game info with images and stats
+## Slash Commands
 
----
+### `/register_user`
 
-## ✨ Installation
+Registers you in the system. Optionally includes a nickname.
 
-### 1. Clone the Repository
+### `/add_game <query>`
+
+Searches BGG and lets you add a game to your collection.
+
+### `/owned_games [user]`
+
+Displays the collection of the user who invoked the command, or another specified user.
+
+### `/remove_game <query>`
+
+Removes a game from your personal collection.
+
+### `/create_session <game> [session_name] [session_date]`
+
+Creates a session for a game you own.
+
+### `/add_session_users <session_id>`
+
+Interactive UI to add users to an existing session.
+
+### `/add_winner <session_id>`
+
+Interactive UI to select and log the winners of a session.
+
+### `/list_sessions <game>`
+
+Shows a list of sessions logged for a specific game.
+
+### `/game_info <query>`
+
+Displays BGG data and lets you add the game to your collection. Similar to /add_game but the game info is posted publicly, whereas /add_game is only seen by the specific user.
+
+### `/who_game <game>`
+
+Shows which users own a specific game.
+
+### `/ask_ai <question>`
+
+Uses OpenAI to answer questions about game rules (⚠️ AI generated, may be inaccurate).
+
+## Setup
+
+### Prerequisites
+
+* Python 3.11+
+* A Supabase project with tables:
+
+  * `users`, `games`, `users_games`, `sessions`, `users_sessions`, `sessions_winners`, `users_servers`
+* BoardGameGeek API (XML)
+* `.env` file with:
+
+  ```
+  DISCORD_TOKEN=your_discord_token
+  GUILD_ID=your_guild_id
+  GUILD_ID_2=your_secondary_guild_id (optional)
+  SUPABASE_URL=your_supabase_url
+  SUPABASE_KEY=your_supabase_key
+  OPENAI_API_KEY=your_openai_key
+  ENV=prod|dev
+  ```
+
+### Installation
 
 ```bash
-git clone https://github.com/RaneWallin/GameNightBot.git
-cd game-night-bot
-```
-
-### 2. Set Up a Virtual Environment
-
-```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Set Up `.env`
-
-Create a `.env` file in the root directory with the following contents:
-
-```env
-DISCORD_TOKEN=your_discord_bot_token
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-supabase-service-role-key
-GUILD_ID=your_discord_guild_id
-```
-
----
-
-## 🔑 Where to Find Supabase Keys
-
-1. Go to [app.supabase.com](https://app.supabase.com) and open your project.
-2. Navigate to **Settings > API**:
-
-   * **SUPABASE\_URL** is your project’s URL (e.g., `https://abcxyz.supabase.co`)
-   * **SUPABASE\_KEY** is the **Service Role** key (⚠️ Keep this secret and secure)
-3. Copy both and paste them into your `.env` file.
-
----
-
-## 🛠 Running the Bot
+### Running the Bot
 
 ```bash
 python bot.py
 ```
 
-You should see:
+### Systemd Setup (Optional)
 
-```
-🤖 Logged in as GameNightBot | Synced to guild 1234567890
-```
+Use `systemctl` to manage your bot as a background service.
 
----
+### Logging
 
-## 📚 Command Highlights
+Use `journalctl -u your_service_name` to view logs.
 
-| Command              | Description                            |
-| -------------------- | -------------------------------------- |
-| `/register_user`     | Register yourself in the system        |
-| `/add_game`          | Add a game from BGG to your collection |
-| `/find_game`         | See who owns a specific game           |
-| `/my_games`          | View your collection                   |
-| `/remove_game`       | Remove a game from your collection     |
-| `/create_session`    | Log a game night session               |
-| `/add_session_users` | Add users to a session (UI-based)      |
-| `/list_sessions`     | List sessions where a game was played  |
-| `/game_info`         | View BGG details and add the game      |
+## Notes
 
----
+* Button and UI interactions timeout after 60 seconds.
+* BGG search labels are truncated to fit Discord UI limits.
+* AI answers should not be relied upon for serious rule debates.
 
-## 💡 Tips
+## Roadmap
 
-* You must register before using most commands (`/register_user`)
-* Only games in the Supabase database can be linked or played
-* `/add_game` uses BGG’s XML API, so search results may vary slightly
+Short-Term Goals
+
+* Add stats (i.e. most played games, most won, etc)
+
+Mid-Term Goals
+
+* Build a web interface
+
+Long-Term Goals
+
+* Host bot for other servers?
 
 ---
 
