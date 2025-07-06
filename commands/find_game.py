@@ -1,23 +1,18 @@
 import aiohttp
 import xml.etree.ElementTree as ET
-from discord import Interaction, SelectOption, ui
+from discord import Interaction, ui, ButtonStyle
 from helpers.supa_helpers import get_game_by_bgg_id, get_users_with_game, get_users_by_ids
 from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
-class GameDropdown(ui.Select):
-    def __init__(self, options: list[SelectOption]):
-        super().__init__(
-            placeholder="Select a game",
-            min_values=1,
-            max_values=1,
-            options=options
-        )
+class GameButton(ui.Button):
+    def __init__(self, label: str, bgg_id: int, game_options: list):
+        super().__init__(label=label[:80], style=ButtonStyle.primary)
+        self.bgg_id = bgg_id
+        self.game_options = game_options
 
     async def callback(self, interaction: Interaction):
-        selected_bgg_id = int(self.values[0])
-
-        game = get_game_by_bgg_id(selected_bgg_id)
+        game = get_game_by_bgg_id(self.bgg_id)
         if not game:
             await interaction.response.send_message("❌ Game not found in the database. Try adding it with `/add_game`.", ephemeral=True)
             return
@@ -36,16 +31,16 @@ class GameDropdown(ui.Select):
         )
 
 
-class GameDropdownView(ui.View):
-    def __init__(self, options: list[SelectOption]):
+class GameButtonView(ui.View):
+    def __init__(self, game_options: list[tuple[int, str]]):
         super().__init__(timeout=60)
-        self.add_item(GameDropdown(options))
+        for bgg_id, label in game_options:
+            self.add_item(GameButton(label, bgg_id, game_options))
 
 
 async def handle_find_game(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
-    query = sanitize_query_input(query)
-    query = escape_query_param(query)
+    query = escape_query_param(sanitize_query_input(query))
 
     search_url = f"https://boardgamegeek.com/xmlapi2/search?query={query}&type=boardgame"
 
@@ -55,7 +50,6 @@ async def handle_find_game(interaction: Interaction, query: str):
                 if response.status != 200:
                     await interaction.followup.send("⚠️ Failed to contact BoardGameGeek. Try again later.", ephemeral=True)
                     return
-
                 xml = await response.text()
     except Exception as e:
         await interaction.followup.send(f"❌ Error fetching game data: {str(e)}", ephemeral=True)
@@ -72,17 +66,15 @@ async def handle_find_game(interaction: Interaction, query: str):
         await interaction.followup.send("❌ No matching games found.", ephemeral=True)
         return
 
-    options = []
-    for item in items[:10]:
-        bgg_id = item.get("id")
+    game_options = []
+    for item in items[:20]:
+        bgg_id = int(item.get("id"))
         name_tag = item.find("name")
         year_tag = item.find("yearpublished")
-
         name = name_tag.get("value") if name_tag is not None else "Unknown"
         year = year_tag.get("value") if year_tag is not None else "N/A"
         label = f"{name} ({year})"
+        game_options.append((bgg_id, label))
 
-        options.append(SelectOption(label=label, value=bgg_id))
-
-    view = GameDropdownView(options)
+    view = GameButtonView(game_options)
     await interaction.followup.send("🔍 Select the correct game:", view=view, ephemeral=True)

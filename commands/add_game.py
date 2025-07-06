@@ -44,7 +44,7 @@ async def handle_add_game(interaction: Interaction, query: str):
         await interaction.followup.send("❌ No matching games found.", ephemeral=True)
         return
 
-    top_games = items[:10]  # Limit to 10 to prevent UI overload
+    top_games = items[:20]  # Limit to 20 to prevent UI overload
     game_options = []
 
     for item in top_games:
