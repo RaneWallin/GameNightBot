@@ -1,6 +1,6 @@
 import discord
 from discord import Interaction, ui, ButtonStyle
-from helpers.supa_helpers import get_user_id_by_discord, get_user_games_sorted_by_name
+from helpers.supa_helpers import get_user_by_discord_id, get_user_games_sorted_by_name
 
 class GamePagination(ui.View):
     def __init__(self, pages: list[str]):
@@ -30,12 +30,13 @@ async def handle_my_games(interaction: Interaction, user: discord.User = None):
     if user is None:
         user = interaction.user
 
-    user_id = get_user_id_by_discord(int(user.id))
-    if not user_id:
+    db_user = get_user_by_discord_id(int(user.id), interaction.guild_id)
+
+    if not db_user:
         await interaction.followup.send("❌ You aren't registered yet. Use `/register_user` to begin.", ephemeral=True)
         return
 
-    game_names = get_user_games_sorted_by_name(user_id)
+    game_names = get_user_games_sorted_by_name(db_user["id"])
     if not game_names:
         await interaction.followup.send("🕹️ You don't have any games in your collection. Use `/add_game` to add one.", ephemeral=True)
         return

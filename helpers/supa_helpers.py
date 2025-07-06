@@ -10,15 +10,6 @@ from config import SUPABASE_URL, SUPABASE_KEY
 # Load .env config
 load_dotenv()
 
-# Validate environment variables
-REQUIRED_ENV_VARS = ["SUPABASE_URL", "SUPABASE_KEY"]
-for var in REQUIRED_ENV_VARS:
-    if not os.getenv(var):
-        raise EnvironmentError(f"Missing required environment variable: {var}")
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
 # Initialize client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY, options=ClientOptions(schema="public"))
 
@@ -26,46 +17,68 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY, options=ClientOptio
 # USER HELPERS
 # -----------------------
 
-def get_or_create_user(discord_user) -> int:
-    discord_id = int(discord_user.id)
-    username = str(discord_user)
+def create_user(discord_id, username, nickname="") -> int:
     existing = supabase.table("users").select("id").eq("discord_id", discord_id).execute()
     if existing.data:
-        return existing.data[0]["id"]
+        return existing.data[0]
     inserted = supabase.table("users").insert({
         "discord_id": discord_id,
         "username": username,
-        "nickname": ""
-    }).execute()
-    return inserted.data[0]["id"]
-
-def get_user_by_discord_id(discord_id: int) -> Optional[Dict[str, Any]]:
-    result = supabase.table("users").select("*").eq("discord_id", discord_id).execute()
-    return result.data[0] if result.data else None
-
-def get_user_id_by_discord(discord_id: int) -> Optional[int]:
-    result = supabase.table("users").select("id").eq("discord_id", discord_id).execute()
-    return result.data[0]["id"] if result.data else None
-
-def get_all_registered_users() -> List[Dict[str, Any]]:
-    return supabase.table("users").select("id, username, nickname").execute().data
-
-def create_user(discord_id: int, username: str, nickname: str = "") -> bool:
-    result = supabase.table("users").insert({
-        "discord_id": discord_id,
-        "username": username,
         "nickname": nickname
     }).execute()
-    return bool(result.data)
+    return inserted.data[0]
 
-def get_or_create_user_id(discord_id: int, username: str, nickname: str = "") -> int:
-    existing = supabase.table("users").select("id").eq("discord_id", discord_id).execute()
+def get_user_by_id(user_id):
+    user = supabase.table("users").select("*").eq("id", user_id).execute()
+    if user.data:
+        return user.data[0]
+    return None
+
+def get_user_by_discord_id(discord_id: int, server_id=None) -> Optional[Dict[str, Any]]:
+    if server_id:
+        try:
+            result = (
+                supabase.table("users_servers")
+                .select("users(id, username, nickname, discord_id)")
+                .eq("server_id", server_id)
+                .eq("users.discord_id", discord_id)
+                .single()
+                .execute()
+            )
+            return result.data["users"]
+        except Exception:
+            return None
+    else:
+        try:
+            result = (
+                supabase.table("users")
+                .select("id, username, nickname, discord_id")
+                .eq("discord_id", discord_id)
+                .single()
+                .execute()
+            )
+            return result.data
+        except Exception:
+            return None
+
+def get_all_registered_users(server_id=None) -> List[Dict[str, Any]]:
+    if server_id:
+        result = (
+            supabase.table("users_servers")
+            .select("users(id, username, nickname)")
+            .eq("server_id", server_id)
+            .execute()
+        )
+    else:
+        return supabase.table("users").select("id, username, nickname").execute().data
+
+def register_user_to_server(user_id: int, server_id: int) -> int:
+    existing = supabase.table('users_servers').select('*').eq('user_id', user_id).eq('server_id', server_id).execute()
     if existing.data:
         return existing.data[0]["id"]
-    created = supabase.table("users").insert({
-        "discord_id": discord_id,
-        "username": username,
-        "nickname": nickname
+    created = supabase.table("users_servers").insert({
+        "user_id": user_id,
+        "server_id": server_id
     }).execute()
     return created.data[0]["id"]
 
@@ -86,10 +99,6 @@ def get_or_create_game(bgg_id: int, game_data: dict) -> int:
         "max_players": game_data["max_players"]
     }).execute()
     return inserted.data[0]["id"]
-
-def find_game_by_bgg_id(bgg_id: int) -> Optional[dict]:
-    result = supabase.table("games").select("id, name").eq("bgg_id", bgg_id).execute()
-    return result.data[0] if result.data else None
 
 def get_game_by_bgg_id(bgg_id: int):
     result = supabase.table("games").select("*").eq("bgg_id", bgg_id).execute()
@@ -169,15 +178,21 @@ def get_users_by_ids(user_ids: List[int]) -> List[Dict[str, Any]]:
 # SESSION HELPERS
 # -----------------------
 
-def create_session_entry(game_id: int, name: Optional[str] = None, date: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    data = {"game_id": game_id}
+def create_session_entry(game_id: int, server_id: int, name: Optional[str] = None, date: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    data = {"game_id": game_id, "server_id": server_id}
     if name: data["name"] = name
     if date: data["date"] = date
     result = supabase.table("sessions").insert(data).execute()
     return result.data[0] if result.data else None
 
-def get_sessions_for_game(game_id: int) -> List[Dict[str, Any]]:
-    result = supabase.table("sessions").select("*").eq("game_id", game_id).order("date", desc=True).execute()
+def get_sessions_for_game(game_id: int, server_id: int) -> List[Dict[str, Any]]:
+    result = (supabase.table("sessions")
+              .select("*")
+              .eq("game_id", game_id)
+              .eq("server_id", server_id)
+              .order("date", desc=True)
+              .execute()
+    )
     return result.data or []
 
 def link_user_to_session(session_id: int, user_id: int):

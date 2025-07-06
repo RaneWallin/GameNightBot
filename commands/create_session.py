@@ -22,12 +22,12 @@ class GameSelect(ui.Select):
 
     async def callback(self, interaction: Interaction):
         game_id = int(self.values[0])
-        session = create_session_entry(game_id, name=self.session_name, date=self.session_date)
+        session = create_session_entry(game_id, interaction.guild_id, name=self.session_name, date=self.session_date)
 
         if session:
             view = build_user_select_view(session["id"])
             await interaction.response.edit_message(
-                content=f"✅ Session for **{self.session_name or session['name_id']}** on **{self.session_date or 'unspecified date'}** created!\n\n👥 Now select players for the session:",
+                content=f"✅ Session for **{self.session_name or session['game_id']}** on **{self.session_date or 'unspecified date'}** created!\n\n👥 Now select players for the session:",
                 view=view
             )
         else:

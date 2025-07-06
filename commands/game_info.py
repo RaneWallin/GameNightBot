@@ -1,14 +1,17 @@
 import aiohttp
 import xml.etree.ElementTree as ET
-from discord import Interaction, ui, SelectOption, Embed, ButtonStyle
-from helpers.supa_helpers import get_or_create_game, get_or_create_user, user_has_game, link_user_game
+from discord import Interaction, ui, Embed, ButtonStyle
+from helpers.supa_helpers import (
+    get_or_create_game,
+    get_user_by_discord_id,
+    user_has_game,
+    link_user_game
+)
 from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 
 async def fetch_bgg_search(query: str):
-    query = sanitize_query_input(query)
-    query = escape_query_param(query)
-    
+    query = escape_query_param(sanitize_query_input(query))
     url = f"https://boardgamegeek.com/xmlapi2/search?query={query}&type=boardgame"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -29,15 +32,12 @@ async def fetch_bgg_game_details(bgg_id: int):
 
 
 def parse_game_embed(game_xml) -> Embed:
-    try:
-        name = game_xml.find("name").attrib["value"]
-        year = game_xml.find("yearpublished").attrib.get("value", "N/A")
-        min_players = game_xml.find("minplayers").attrib.get("value", "?")
-        max_players = game_xml.find("maxplayers").attrib.get("value", "?")
-        play_time = game_xml.find("playingtime").attrib.get("value", "?")
-        image_url = game_xml.find("image").text if game_xml.find("image") is not None else None
-    except Exception:
-        return Embed(title="Error parsing game details", description="Some data may be missing or malformed.")
+    name = game_xml.find("name").attrib["value"]
+    year = game_xml.find("yearpublished").attrib.get("value", "N/A")
+    min_players = game_xml.find("minplayers").attrib.get("value", "?")
+    max_players = game_xml.find("maxplayers").attrib.get("value", "?")
+    play_time = game_xml.find("playingtime").attrib.get("value", "?")
+    image_url = game_xml.find("image").text if game_xml.find("image") is not None else None
 
     embed = Embed(
         title=f"{name} ({year})",
@@ -74,21 +74,24 @@ async def handle_game_info(interaction: Interaction, query: str):
         await interaction.followup.send("❌ No games found on BoardGameGeek.")
         return
 
-    options = []
-    for item in items[:20]:
+    game_options = []
+    for item in items[:20]:  # Keep under 25 for button limit
+        bgg_id = int(item.attrib["id"])
         name = item.find("name").attrib.get("value", "Unknown")
         year_tag = item.find("yearpublished")
         year = year_tag.attrib.get("value", "N/A") if year_tag is not None else "N/A"
-        options.append(SelectOption(label=f"{name} ({year})", value=item.attrib["id"]))
+        label = f"{name} ({year})"
+        game_options.append((bgg_id, label))
 
-    class GameSelect(ui.Select):
-        def __init__(self):
-            super().__init__(placeholder="Select a game to view details", options=options)
+    class GameButton(ui.Button):
+        def __init__(self, bgg_id: int, label: str):
+            super().__init__(label=label[:80], style=ButtonStyle.primary)
+            self.bgg_id = bgg_id
+            self.label = label
 
         async def callback(self, i: Interaction):
-            bgg_id = int(self.values[0])
             try:
-                game_xml = await fetch_bgg_game_details(bgg_id)
+                game_xml = await fetch_bgg_game_details(self.bgg_id)
                 embed = parse_game_embed(game_xml)
             except Exception as e:
                 await i.response.send_message(f"❌ Could not fetch game details: {str(e)}", ephemeral=True)
@@ -100,7 +103,7 @@ async def handle_game_info(interaction: Interaction, query: str):
             min_players = int(game_xml.find("minplayers").attrib.get("value", 0))
             max_players = int(game_xml.find("maxplayers").attrib.get("value", 0))
 
-            game_id = get_or_create_game(bgg_id, {
+            game_id = get_or_create_game(self.bgg_id, {
                 "name": name,
                 "publisher": publisher,
                 "designer": designer,
@@ -113,22 +116,26 @@ async def handle_game_info(interaction: Interaction, query: str):
                     super().__init__(label="Add to My Collection", style=ButtonStyle.success)
 
                 async def callback(self, button_interaction: Interaction):
-                    user_id = get_or_create_user(button_interaction.user)
+                    user = get_user_by_discord_id(button_interaction.user.id)
+                    if not user:
+                        await button_interaction.response.send_message("❌ User is not registered. Use /register_user.", ephemeral=True)
+                        return
 
-                    if user_has_game(user_id, game_id):
+                    if user_has_game(user["id"], game_id):
                         await button_interaction.response.send_message("✅ Already in your collection.", ephemeral=True)
                     else:
-                        link_user_game(user_id, game_id)
+                        link_user_game(user["id"], game_id)
                         await button_interaction.response.send_message(f"🎉 Added **{name}** to your collection!", ephemeral=True)
 
             view = ui.View(timeout=300)
             view.add_item(AddButton())
+            await i.response.edit_message(content=None, embed=embed, view=view)
 
-            await i.response.edit_message(content="", embed=embed, view=view)
+    class GameButtonView(ui.View):
+        def __init__(self, game_options):
+            super().__init__(timeout=90)
+            for bgg_id, label in game_options:
+                self.add_item(GameButton(bgg_id, label))
 
-    class GameSelectView(ui.View):
-        def __init__(self):
-            super().__init__(timeout=60)
-            self.add_item(GameSelect())
-
-    await interaction.followup.send("🎲 Select a game to view details:", view=GameSelectView())
+    view = GameButtonView(game_options)
+    await interaction.followup.send("🎲 Select a game to view details:", view=view)

@@ -3,7 +3,6 @@ from discord import Interaction, ui, SelectOption
 from helpers.supa_helpers import (
     get_all_registered_users,
     get_users_in_session,
-    link_user_to_session,
     get_winners_in_session,
     link_winner_to_session
 )

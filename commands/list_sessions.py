@@ -1,52 +1,8 @@
 import discord
-from discord import Interaction, ui, SelectOption
+from discord import Interaction, ui, ButtonStyle
 from helpers.supa_helpers import search_games_fuzzy, get_sessions_for_game
-from helpers.input_sanitizer import sanitize_query_input, escape_query_param
+from helpers.input_sanitizer import sanitize_query_input
 
-
-class SessionGameSelect(ui.Select):
-    def __init__(self, games):
-        options = [
-            SelectOption(label=g.get("name", "Unknown Game"), value=str(g["id"]))
-            for g in games
-        ]
-        super().__init__(
-            placeholder="Choose a game to list sessions",
-            min_values=1,
-            max_values=1,
-            options=options
-        )
-
-    async def callback(self, interaction: Interaction):
-        game_id = int(self.values[0])
-        try:
-            sessions = get_sessions_for_game(game_id)
-        except Exception as e:
-            await interaction.response.edit_message(
-                content=f"❌ Failed to fetch sessions: {str(e)}", view=None
-            )
-            return
-
-        if not sessions:
-            await interaction.response.edit_message(
-                content="📭 No sessions found for that game.", view=None
-            )
-            return
-
-        session_lines = [
-            f"🗓️ **Session ID: {s.get('id', '?')} - {s.get('date', 'No Date')}** — {s.get('name') or '(no name)'}"
-            for s in sessions
-        ]
-        session_text = "\n".join(session_lines)
-
-        await interaction.response.edit_message(
-            content=f"📋 Sessions for selected game:\n\n{session_text}", view=None
-        )
-
-class SessionSelectView(ui.View):
-    def __init__(self, games):
-        super().__init__(timeout=60)
-        self.add_item(SessionGameSelect(games))
 
 async def handle_list_sessions(interaction: Interaction, query: str):
     await interaction.response.defer(ephemeral=True)
@@ -66,7 +22,44 @@ async def handle_list_sessions(interaction: Interaction, query: str):
         )
         return
 
-    view = SessionSelectView(games)
+    class GameButton(ui.Button):
+        def __init__(self, game_id: int, label: str):
+            super().__init__(label=label[:80], style=ButtonStyle.primary)
+            self.game_id = game_id
+
+        async def callback(self, i: Interaction):
+            try:
+                sessions = get_sessions_for_game(self.game_id, i.guild_id)
+            except Exception as e:
+                await i.response.edit_message(
+                    content=f"❌ Failed to fetch sessions: {str(e)}", view=None
+                )
+                return
+
+            if not sessions:
+                await i.response.edit_message(
+                    content="📭 No sessions found for that game.", view=None
+                )
+                return
+
+            session_lines = [
+                f"🗓️ **Session ID: {s.get('id', '?')} - {s.get('date', 'No Date')}** — {s.get('name') or '(no name)'}"
+                for s in sessions
+            ]
+            session_text = "\n".join(session_lines)
+
+            await i.response.edit_message(
+                content=f"📋 Sessions for selected game:\n\n{session_text}",
+                view=None
+            )
+
+    class GameButtonView(ui.View):
+        def __init__(self, games):
+            super().__init__(timeout=60)
+            for game in games[:20]:  # Discord allows max 25 buttons in one view
+                self.add_item(GameButton(game["id"], game["name"]))
+
+    view = GameButtonView(games)
     await interaction.followup.send(
         "🎲 Select the game to view sessions:", view=view, ephemeral=True
     )
