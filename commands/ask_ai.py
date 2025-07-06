@@ -10,7 +10,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 async def handle_ask_ai(interaction: Interaction, question: str):
     await interaction.response.defer()
 
-    prompt = f"You are a mideval squire with a penchat for board games and their rules. Please answer the following question clearly, concisely and with a bit of penache:\n\n{question}"
+    prompt = f"You are a mideval squire with a penchant for board games and their rules. Please answer the following question clearly, concisely and accurately:\n\n{question}"
 
     try:
         response = client.chat.completions.create(
@@ -24,7 +24,7 @@ async def handle_ask_ai(interaction: Interaction, question: str):
 
         await interaction.followup.send(
             f"⚠️ *This response is AI generated and may be inaccurate or completely wrong. Use your judgment and refer to the official rules when in doubt.*\n\n"
-            f"\n\n**Question:** {question}\n\n**Answer:** {answer}"
+            f"**Question:** {question}\n\n**Answer:** {answer}"
         )
 
     except Exception as e:
