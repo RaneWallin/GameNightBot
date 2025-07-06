@@ -41,6 +41,7 @@ from commands.list_sessions import handle_list_sessions
 from commands.game_info import handle_game_info
 from commands.add_session_users import handle_add_session_users
 from commands.add_winners import handle_add_session_winners
+from commands.ask_ai import handle_ask_ai
 
 @bot.event
 async def on_ready():
@@ -106,6 +107,11 @@ async def add_session_users(interaction: Interaction, session_id: int):
 @app_commands.describe(session_id="ID of the session")
 async def add_winner(interaction: Interaction, session_id: int):
     await handle_add_session_winners(interaction, session_id)
+
+@bot.tree.command(name="ask_ai", description="Ask the AI a question about board game rules", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(question="Your question about board game rules")
+async def ask_ai(interaction: Interaction, question: str):
+    await handle_ask_ai(interaction, question)
 
 # Safely start the bot
 try:
