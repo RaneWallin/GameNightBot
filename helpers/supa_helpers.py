@@ -36,22 +36,30 @@ def get_user_by_id(user_id):
 
 def get_user_by_discord_id(discord_id: int, server_id=None) -> Optional[Dict[str, Any]]:
     if server_id:
-        result = (
-            supabase.table("users_servers")
-            .select("users(id, username, nickname, discord_id)")
-            .eq("server_id", server_id)
-            .eq("users.discord_id", discord_id)
-            .single()
-            .execute()
-        )
-
+        try:
+            result = (
+                supabase.table("users_servers")
+                .select("users(id, username, nickname, discord_id)")
+                .eq("server_id", server_id)
+                .eq("users.discord_id", discord_id)
+                .single()
+                .execute()
+            )
+            return result.data["users"]
+        except Exception:
+            return None
     else:
-        result = (supabase.table("users")
-            .select("id, username, nickname")
-            .eq("discord_id", discord_id)
-            .single()
-            .execute())
-    return result.data["users"] if result.data else None
+        try:
+            result = (
+                supabase.table("users")
+                .select("id, username, nickname, discord_id")
+                .eq("discord_id", discord_id)
+                .single()
+                .execute()
+            )
+            return result.data
+        except Exception:
+            return None
 
 def get_all_registered_users(server_id=None) -> List[Dict[str, Any]]:
     if server_id:
