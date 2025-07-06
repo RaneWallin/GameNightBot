@@ -80,7 +80,11 @@ async def handle_game_info(interaction: Interaction, query: str):
         name = item.find("name").attrib.get("value", "Unknown")
         year_tag = item.find("yearpublished")
         year = year_tag.attrib.get("value", "N/A") if year_tag is not None else "N/A"
-        label = f"{name} ({year})"
+        
+        max_name_length = 80 - len(f" ({year})")
+        trimmed_name = name[:max_name_length - 1] + "…" if len(name) > max_name_length else name
+        label = f"{trimmed_name} ({year})"
+
         game_options.append((bgg_id, label))
 
     class GameButton(ui.Button):
