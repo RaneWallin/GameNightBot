@@ -174,8 +174,8 @@ def get_users_by_ids(user_ids: List[int]) -> List[Dict[str, Any]]:
 # SESSION HELPERS
 # -----------------------
 
-def create_session_entry(game_id: int, name: Optional[str] = None, date: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    data = {"game_id": game_id}
+def create_session_entry(game_id: int, server_id: int, name: Optional[str] = None, date: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    data = {"game_id": game_id, "server_id": server_id}
     if name: data["name"] = name
     if date: data["date"] = date
     result = supabase.table("sessions").insert(data).execute()
