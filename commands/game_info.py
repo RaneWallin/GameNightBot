@@ -1,7 +1,12 @@
 import aiohttp
 import xml.etree.ElementTree as ET
 from discord import Interaction, ui, SelectOption, Embed, ButtonStyle
-from helpers.supa_helpers import get_or_create_game, get_user_by_discord_id, user_has_game, link_user_game
+from helpers.supa_helpers import (
+    get_or_create_game, 
+    get_user_by_discord_id, 
+    user_has_game, 
+    link_user_game
+)
 from helpers.input_sanitizer import sanitize_query_input, escape_query_param
 
 

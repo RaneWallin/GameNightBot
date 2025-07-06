@@ -100,10 +100,6 @@ def get_or_create_game(bgg_id: int, game_data: dict) -> int:
     }).execute()
     return inserted.data[0]["id"]
 
-def find_game_by_bgg_id(bgg_id: int) -> Optional[dict]:
-    result = supabase.table("games").select("id, name").eq("bgg_id", bgg_id).execute()
-    return result.data[0] if result.data else None
-
 def get_game_by_bgg_id(bgg_id: int):
     result = supabase.table("games").select("*").eq("bgg_id", bgg_id).execute()
     return result.data[0] if result.data else None
