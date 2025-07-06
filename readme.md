@@ -111,6 +111,7 @@ Use `journalctl -u your_service_name` to view logs.
 Short-Term Goals
 
 * Add stats (i.e. most played games, most won, etc)
+* Better test coverage
 
 Mid-Term Goals
 
