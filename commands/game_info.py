@@ -116,7 +116,7 @@ async def handle_game_info(interaction: Interaction, query: str):
                     user = get_user_by_discord_id(button_interaction.user.id)
 
                     if user:
-                        user_id = user.data[0]["id"]
+                        user_id = user["id"]
                     else:
                         await button_interaction.response.send_message("User is not registered. Please use /register_user.")
                         return

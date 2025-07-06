@@ -36,7 +36,7 @@ async def handle_my_games(interaction: Interaction, user: discord.User = None):
         await interaction.followup.send("❌ You aren't registered yet. Use `/register_user` to begin.", ephemeral=True)
         return
 
-    game_names = get_user_games_sorted_by_name(db_user.data[0]["id"])
+    game_names = get_user_games_sorted_by_name(db_user["id"])
     if not game_names:
         await interaction.followup.send("🕹️ You don't have any games in your collection. Use `/add_game` to add one.", ephemeral=True)
         return
