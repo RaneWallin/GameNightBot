@@ -42,6 +42,9 @@ from commands.game_info import handle_game_info
 from commands.add_session_users import handle_add_session_users
 from commands.add_winners import handle_add_session_winners
 from commands.ask_ai import handle_ask_ai
+from commands.user_stats import handle_user_stats
+from commands.game_stats import handle_game_stats
+
 
 @bot.event
 async def on_ready():
@@ -112,6 +115,16 @@ async def add_winner(interaction: Interaction, session_id: int):
 @app_commands.describe(question="Your question about board game rules")
 async def ask_ai(interaction: Interaction, question: str):
     await handle_ask_ai(interaction, question)
+
+@bot.tree.command(name="user_stats", description="View stats for yourself or another user", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(user="Optional user to view stats for")
+async def user_stats(interaction: Interaction, user: discord.User = None):
+    await handle_user_stats(interaction, user)
+
+@bot.tree.command(name="game_stats", description="See how many times a game has been played and top winners.", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(query="Name of the game to search")
+async def game_stats(interaction: discord.Interaction, query: str):
+    await handle_game_stats(interaction, query)
 
 # Safely start the bot
 try:

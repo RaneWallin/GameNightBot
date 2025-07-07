@@ -25,7 +25,7 @@ class GameSelect(ui.Select):
         session = create_session_entry(game_id, interaction.guild_id, name=self.session_name, date=self.session_date)
 
         if session:
-            view = build_user_select_view(session["id"])
+            view = build_user_select_view(session["id"], interaction.guild_id)
             await interaction.response.edit_message(
                 content=f"✅ Session for **{self.session_name or session['game_id']}** on **{self.session_date or 'unspecified date'}** created!\n\n👥 Now select players for the session:",
                 view=view
@@ -53,8 +53,8 @@ async def handle_create_session(interaction: Interaction, query: str, session_na
     view = GameSelectView(games, session_name, session_date)
     await interaction.followup.send("🎯 Select the game you played:", view=view, ephemeral=True)
 
-def build_user_select_view(session_id: int):
-    users = get_all_registered_users()
+def build_user_select_view(session_id: int, server_id: int):
+    users = get_all_registered_users(server_id)
     already_linked = {u["user_id"] for u in get_users_in_session(session_id)}
     eligible_users = [u for u in users if u["id"] not in already_linked]
 
