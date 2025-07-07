@@ -180,7 +180,7 @@ def get_users_with_game(game_id: int) -> List[int]:
 def get_users_by_ids(user_ids: List[int]) -> List[Dict[str, Any]]:
     if not user_ids:
         return []
-    result = supabase.table("users").select("username, nickname").in_("id", user_ids).execute()
+    result = supabase.table("users").select("username, nickname, id").in_("id", user_ids).execute()
     return result.data
 
 # -----------------------
@@ -225,6 +225,7 @@ def link_winner_to_session(session_id: int, user_id: int):
 def get_session_by_id(session_id: int):
     return supabase.from_("sessions").select("*").eq("id", session_id).single()
 
-def get_winners_in_session(session_id: int) -> List[Dict[str, Any]]:
+def get_winners_in_session(session_id: int) -> List[int]:
     result = supabase.table("sessions_winners").select("user_id").eq("session_id", session_id).execute()
-    return result.data or []
+    return [r["user_id"] for r in result.data] if result.data else []
+

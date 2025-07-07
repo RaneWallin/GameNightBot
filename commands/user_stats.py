@@ -1,4 +1,6 @@
-from discord import Interaction
+from discord import Interaction, ui, ButtonStyle
+import discord
+from discord.utils import escape_markdown
 from helpers.supa_helpers import (
     get_user_by_discord_id,
     get_sessions_for_game,
@@ -18,7 +20,7 @@ def get_total_sessions_played(user_id: int, all_sessions: list[dict]) -> int:
 
 def get_total_wins(user_id: int, all_sessions: list[dict]) -> int:
     return sum(
-        user_id in [w["user_id"] for w in get_winners_in_session(s["id"])]
+        user_id in get_winners_in_session(s["id"])
         for s in all_sessions
     )
 
@@ -53,8 +55,28 @@ def get_all_sessions(server_id: int) -> list[dict]:
     return sessions
 
 
+class ShareStatsButton(discord.ui.Button):
+    def __init__(self, message_content: str):
+        super().__init__(label="📢 Share Publicly", style=discord.ButtonStyle.primary)
+        self.message_content = message_content
+
+    async def callback(self, interaction: discord.Interaction):
+        # Disable all buttons in the view manually
+        for child in self.view.children:
+            child.disabled = True
+
+        # Send the stats publicly
+        await interaction.channel.send(self.message_content)
+
+
+class ShareStatsView(discord.ui.View):
+    def __init__(self, message_content: str):
+        super().__init__(timeout=60)
+        self.add_item(ShareStatsButton(message_content))
+
+
 async def handle_user_stats(interaction: Interaction, user=None):
-    await interaction.response.defer(ephemeral=False)
+    await interaction.response.defer(ephemeral=True)
 
     if user is None:
         user = interaction.user
@@ -71,10 +93,17 @@ async def handle_user_stats(interaction: Interaction, user=None):
     total_wins = get_total_wins(user_id, all_sessions)
     most_played_name, most_played_count = get_most_played_game(user_id, all_sessions)
 
-    await interaction.followup.send(
+    stats_text = (
         f"📊 **Stats for {user.mention}**\n"
         f"• 🎮 Sessions played: **{total_sessions}**\n"
         f"• 🏆 Wins: **{total_wins}**\n"
-        f"• 🔁 Most played: **{most_played_name}** ({most_played_count}x)",
-        ephemeral=False
+        f"• 🔁 Most played: **{escape_markdown(most_played_name)}** ({most_played_count}x)"
+    )
+
+    view = ShareStatsView(stats_text)
+
+    await interaction.followup.send(
+        content=stats_text,
+        view=view,
+        ephemeral=True
     )

@@ -49,7 +49,7 @@ async def handle_add_session_winners(interaction: Interaction, session_id: int):
     try:
         all_users = get_all_registered_users()
         session_users = get_users_in_session(session_id)
-        already_linked = [u["user_id"] for u in get_winners_in_session(session_id)]
+        already_linked = get_winners_in_session(session_id)
     except Exception as e:
         await interaction.followup.send("❌ Failed to retrieve users.", ephemeral=True)
         return
