@@ -69,6 +69,7 @@ def get_all_registered_users(server_id=None) -> List[Dict[str, Any]]:
             .eq("server_id", server_id)
             .execute()
         )
+        return [entry["users"] for entry in result.data if "users" in entry]
     else:
         return supabase.table("users").select("id, username, nickname").execute().data
 
@@ -109,6 +110,14 @@ def get_games_by_ids(game_ids: List[int]) -> List[Dict[str, Any]]:
         return []
     result = supabase.table("games").select("id, name").in_("id", game_ids).order("name").execute()
     return result.data
+
+def get_game_by_id(game_id: int) -> Optional[Dict[str, Any]]:
+    result = supabase.table("games").select("*").eq("id", game_id).single().execute()
+    return result.data if result.data else None
+
+def get_all_games() -> List[Dict[str, Any]]:
+    result = supabase.table("games").select("id, name").execute()
+    return result.data or []
 
 def search_games_fuzzy(query: str, limit: int = 10) -> List[Dict[str, Any]]:
     all_games = supabase.table("games").select("id, name").execute().data
