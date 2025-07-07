@@ -45,9 +45,9 @@ async def handle_my_games(interaction: Interaction, user: discord.User = None):
     total_pages = (len(game_names) + page_size - 1) // page_size
 
     pages = [
-        f"📚 **Your Games (Page {i + 1}/{total_pages})**:\n" +
+        f"📚 **Your Games (Page {page_idx + 1}/{total_pages})**:\n" +
         "\n".join(f"• {name}" for name in game_names[i:i + page_size])
-        for i in range(0, len(game_names), page_size)
+        for page_idx, i in enumerate(range(0, len(game_names), page_size))
     ]
 
     view = GamePagination(pages)
