@@ -83,13 +83,10 @@ async def register_user(interaction: Interaction, nickname: str = ""):
     await handle_register_user(interaction, nickname)
 
 @bot.tree.command(name="create_session", description="Log a session for a game", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
-@app_commands.describe(
-    game="Name of the game",
-    session_name="Optional name for the session",
-    session_date="Date of the session (YYYY-MM-DD)"
-)
-async def create_session(interaction: Interaction, game: str, session_name: str = "", session_date: str = ""):
-    await handle_create_session(interaction, game, session_name or None, session_date or None)
+@app_commands.describe(game_query="Search for a game by name")
+async def create_session(interaction: discord.Interaction, game_query: str):
+    await handle_create_session(interaction, game_query)
+
 
 @bot.tree.command(name="list_sessions", description="List sessions for a game", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
 @app_commands.describe(game="Name of the game")
