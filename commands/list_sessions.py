@@ -49,7 +49,7 @@ class GameSessionPaginator(ui.View):
                 winner_text = "not selected"
 
             lines.append(
-                f"**Session ID: {s.get('id', '?')} - {s.get('date', 'No Date')}** — {s.get('name') or '(no name)'}\n"
+                f"**(Session ID: {s.get('id', '?')})  {s.get('date', 'No Date')}** — {s.get('name') or '(no name)'}\n"
                 f"   🏆 Winners: {winner_text}"
             )
 
