@@ -229,3 +229,10 @@ def get_winners_in_session(session_id: int) -> List[int]:
     result = supabase.table("sessions_winners").select("user_id").eq("session_id", session_id).execute()
     return [r["user_id"] for r in result.data] if result.data else []
 
+def delete_session_by_id(session_id: int) -> None:
+    # Delete any user links or winner links first if you have foreign key constraints
+    supabase.table("sessions_users").delete().eq("session_id", session_id).execute()
+    supabase.table("sessions_winners").delete().eq("session_id", session_id).execute()
+    
+    # Now delete the session itself
+    supabase.table("sessions").delete().eq("id", session_id).execute()
