@@ -1,93 +1,114 @@
-# 🌪 Squire
+# 🌪️ Squire
 
-Squire is a Discord bot designed to help communities manage board game collections, track play sessions, and coordinate game nights. It integrates with [BoardGameGeek](https://boardgamegeek.com) for game data and uses [Supabase](https://supabase.io) as its backend.
+**Squire** is a powerful Discord bot for organizing board game nights. It helps communities manage collections, track sessions, and celebrate stats—all with seamless BoardGameGeek integration and Supabase as a backend.
 
-## Features
+---
 
-* Register users to the server
-* Search and add games from BGG
-* View your personal or others' game collections
-* Create and log game sessions
-* Add session participants and winners
-* Ask AI questions about game rules
+## 🎯 Features
 
-## Slash Commands
+* 🧑‍💼 Register users with optional nicknames
+* 🎲 Search and add games from [BoardGameGeek](https://boardgamegeek.com)
+* 📚 View personal or shared game collections
+* 📅 Create and manage play sessions with names & dates
+* 👥 Add session participants and winners
+* 📊 View user and game stats
+* 🧠 Ask AI questions about game rules
+* 🗑️ Delete sessions with confirmation
+* 🏷️ Update your display nickname
+* 📜 Paginated session history with winner display
 
-### `/register_user`
+---
 
-Registers you in the system. Optionally includes a nickname.
+## 🚀 Slash Commands
 
-### `/add_game <query>`
+### 🧑 User Commands
 
-Searches BGG and lets you add a game to your collection.
+* `/register_user [nickname]`
+  Registers you in the system with an optional nickname.
 
-### `/owned_games [user]`
+* `/update_nickname <nickname>`
+  Updates your display nickname.
 
-Displays the collection of the user who invoked the command, or another specified user.
+### 🎲 Game Management
 
-### `/remove_game <query>`
+* `/add_game <query>`
+  Search BoardGameGeek and add a game to your collection.
 
-Removes a game from your personal collection.
+* `/remove_game <query>`
+  Remove a game from your collection.
 
-### `/create_session <game> [session_name] [session_date]`
+* `/owned_games [user]`
+  Show your or another user’s board game collection.
 
-Creates a session for a game you own.
+* `/who_game <game>`
+  Find out who owns a specific game.
 
-### `/add_session_users <session_id>`
+* `/game_info <query>`
+  View BGG data for a game and optionally add it to your collection (publicly visible).
 
-Interactive UI to add users to an existing session.
+### 📆 Session Management
 
-### `/add_winner <session_id>`
+* `/create_session <game_query>`
+  Log a new game session by selecting a game, then entering a name and date.
 
-Interactive UI to select and log the winners of a session.
+* `/add_session_users <session_id>`
+  Add players to a session via dropdown.
 
-### `/list_sessions <game>`
+* `/add_winner <session_id>`
+  Select and record winners for a session.
 
-Shows a list of sessions logged for a specific game.
+* `/list_sessions <game>`
+  View a paginated list of sessions for a game, including winners and delete buttons.
 
-### `/game_info <query>`
+* `/delete_session <session_id>`
+  Delete a session after previewing its details.
 
-Displays BGG data and lets you add the game to your collection. Similar to /add_game but the game info is posted publicly, whereas /add_game is only seen by the specific user.
+### 🤖 AI Support
 
-### `/who_game <game>`
+* `/ask_ai <question>`
+  Ask an AI assistant about game rules (⚠️ AI-generated, use with discretion).
 
-Shows which users own a specific game.
+* `/user_stats [user]`
+  View session wins and stats for yourself or another user.
 
-### `/ask_ai <question>`
+* `/game_stats <query>`
+  See how often a game has been played and its top winners.
 
-Uses OpenAI to answer questions about game rules (⚠️ AI generated, may be inaccurate).
+---
 
-## Setup
+## 🛠️ Setup
 
-### Prerequisites
+### 🔧 Prerequisites
 
 * Python 3.11+
-* A Supabase project with tables:
+* Supabase project with the following tables:
 
-  * `users`, `games`, `users_games`, `sessions`, `users_sessions`, `sessions_winners`, `users_servers`
-* BoardGameGeek API (XML)
-* `.env` file with:
+  * `users`, `games`, `users_games`, `sessions`, `sessions_users`, `sessions_winners`, `users_servers`
+* BoardGameGeek XML API access
+* `.env` file with the following:
 
-  ```
-   DISCORD_TOKEN_DEV=12345
-   DISCORD_TOKEN_PROD=6789
+```env
+DISCORD_TOKEN_DEV=your_dev_token
+DISCORD_TOKEN_PROD=your_prod_token
 
-   SUPABASE_URL_PROD=https://your_project_url.supabase.co
-   SUPABASE_KEY_PROD=12345
+SUPABASE_URL_DEV=https://your-dev.supabase.co
+SUPABASE_KEY_DEV=your-dev-key
 
-   SUPABASE_URL_DEV=https://your_dev_project_url.supabase.co
-   SUPABASE_KEY_DEV=56789
+SUPABASE_URL_PROD=https://your-prod.supabase.co
+SUPABASE_KEY_PROD=your-prod-key
 
-   OPEN_AI_DEV_KEY=12345
-   OPEN_AI_PROD_KEY=56789
+OPEN_AI_DEV_KEY=your-openai-dev-key
+OPEN_AI_PROD_KEY=your-openai-prod-key
 
-   GUILD_ID=your_discord_server_id
-   GUILD_ID_2=your_discord_server_id
+GUILD_ID=your_discord_guild_id
+GUILD_ID_2=your_optional_second_guild_id
 
-  ENV=prod|dev
-  ```
+ENV=dev|prod
+```
 
-### Installation
+---
+
+### 🧪 Installation
 
 ```bash
 python -m venv .venv
@@ -95,43 +116,80 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Running the Bot
+---
+
+### ▶️ Running the Bot
 
 ```bash
 python bot.py
 ```
 
-### Systemd Setup (Optional)
+---
 
-Use `systemctl` to manage your bot as a background service.
+### 🖥️ Optional: Systemd Service
 
-### Logging
+To run the bot as a background service:
 
-Use `journalctl -u your_service_name` to view logs.
+1. Create a service file:
 
-## Notes
+   ```ini
+   [Unit]
+   Description=Squire Bot
+   After=network.target
 
-* Button and UI interactions timeout after 60 seconds.
-* BGG search labels are truncated to fit Discord UI limits.
-* AI answers should not be relied upon for serious rule debates.
+   [Service]
+   Type=simple
+   WorkingDirectory=/path/to/your/project
+   ExecStart=/path/to/your/project/.venv/bin/python bot.py
+   Restart=on-failure
 
-## Roadmap
+   [Install]
+   WantedBy=multi-user.target
+   ```
 
-Short-Term Goals
+2. Save as `/etc/systemd/system/squire.service`, then:
 
-* Add stats (i.e. most played games, most won, etc)
-* Better test coverage
+```bash
+sudo systemctl enable squire
+sudo systemctl start squire
+```
 
-Mid-Term Goals
+Check logs with:
 
-* Build a web interface
-
-Long-Term Goals
-
-* Host bot for other servers?
+```bash
+journalctl -u squire -f
+```
 
 ---
 
-## 📟 License
+## 📝 Notes
 
-MIT License © 2025 Rane Wallin
+* Interaction UIs (buttons/selects) timeout after 60 seconds.
+* BGG game names are truncated to fit Discord UI limits.
+* AI responses are for fun; verify against official rules for accuracy.
+
+---
+
+## 🗺 Roadmap
+
+### 🔜 Short-Term
+
+* 🎯 More slash command autocomplete
+* 🏅 Global leaderboard and stat summaries
+* 📤 Export session data
+
+### 🧱 Mid-Term
+
+* 🌐 Web dashboard for collection/session editing
+* 📈 Charts and visual stats
+
+### 🚀 Long-Term
+
+* Multi-server hosting with user opt-in
+* Auto-reminders for scheduled sessions
+
+---
+
+## 📄 License
+
+MIT License © 2025 [Rane Wallin](https://github.com/ranewallin)
