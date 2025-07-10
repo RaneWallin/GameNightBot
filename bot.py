@@ -123,6 +123,13 @@ async def user_stats(interaction: Interaction, user: discord.User = None):
 async def game_stats(interaction: discord.Interaction, query: str):
     await handle_game_stats(interaction, query)
 
+@bot.tree.command(name="delete_session", description="Delete a game session by ID", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(session_id="The ID of the session you want to delete")
+async def delete_session(interaction: discord.Interaction, session_id: int):
+    from commands.delete_session import handle_delete_session
+    await handle_delete_session(interaction, session_id)
+
+
 # Safely start the bot
 try:
     bot.run(DISCORD_TOKEN)
