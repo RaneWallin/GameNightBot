@@ -44,6 +44,7 @@ from commands.add_winners import handle_add_session_winners
 from commands.ask_ai import handle_ask_ai
 from commands.user_stats import handle_user_stats
 from commands.game_stats import handle_game_stats
+from commands.update_nickname import handle_update_nickname
 
 
 @bot.event
@@ -128,6 +129,12 @@ async def game_stats(interaction: discord.Interaction, query: str):
 async def delete_session(interaction: discord.Interaction, session_id: int):
     from commands.delete_session import handle_delete_session
     await handle_delete_session(interaction, session_id)
+
+@bot.tree.command(name="update_nickname", description="Update your nickname in the database.", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(nickname="The new nickname to display")
+async def update_nickname(interaction: Interaction, nickname: str):
+    await handle_update_nickname(interaction, nickname)
+
 
 
 # Safely start the bot

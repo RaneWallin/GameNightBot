@@ -83,6 +83,11 @@ def register_user_to_server(user_id: int, server_id: int) -> int:
     }).execute()
     return created.data[0]["id"]
 
+def update_user(user_id: int, updates: dict) -> dict:
+    result = supabase.table("users").update(updates).eq("id", user_id).execute()
+    return result.data[0] if result.data else {}
+
+
 # -----------------------
 # GAME HELPERS
 # -----------------------
