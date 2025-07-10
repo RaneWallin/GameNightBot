@@ -223,7 +223,8 @@ def link_winner_to_session(session_id: int, user_id: int):
     supabase.from_("sessions_winners").insert({"session_id": session_id, "user_id": user_id}).execute()
 
 def get_session_by_id(session_id: int):
-    return supabase.from_("sessions").select("*").eq("id", session_id).single()
+    result = supabase.from_("sessions").select("*").eq("id", session_id).single().execute()
+    return result.data or []
 
 def get_winners_in_session(session_id: int) -> List[int]:
     result = supabase.table("sessions_winners").select("user_id").eq("session_id", session_id).execute()
