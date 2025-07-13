@@ -45,6 +45,7 @@ from commands.ask_ai import handle_ask_ai
 from commands.user_stats import handle_user_stats
 from commands.game_stats import handle_game_stats
 from commands.update_nickname import handle_update_nickname
+from commands.rate_game import handle_rate_game
 
 
 @bot.event
@@ -135,7 +136,10 @@ async def delete_session(interaction: discord.Interaction, session_id: int):
 async def update_nickname(interaction: Interaction, nickname: str):
     await handle_update_nickname(interaction, nickname)
 
-
+@bot.tree.command(name="rate_game", description="Create a poll to rate a game from 1 to 5", guilds=[discord.Object(id=GUILD_ID), discord.Object(id=GUILD_ID_2)])
+@app_commands.describe(query="The name of the game to rate")
+async def rate_game(interaction: Interaction, query: str):
+    await handle_rate_game(interaction, query)
 
 # Safely start the bot
 try:

@@ -5,6 +5,8 @@ from thefuzz import fuzz
 from supabase import create_client, Client
 from supabase.lib.client_options import ClientOptions
 from config import SUPABASE_URL, SUPABASE_KEY
+from datetime import datetime
+
 
 
 # Load .env config
@@ -129,6 +131,37 @@ def search_games_fuzzy(query: str, limit: int = 10) -> List[Dict[str, Any]]:
     scored = [(g, fuzz.partial_ratio(query.lower(), g["name"].lower())) for g in all_games]
     top_matches = sorted(scored, key=lambda x: x[1], reverse=True)[:limit]
     return [g for g, _ in top_matches]
+
+def add_or_update_rating(user_id: int, game_id: int, rating: int, expires_at: datetime):
+    payload = {
+        "rating": rating,
+        "expires_at": expires_at.isoformat()
+    }
+
+    # Try to update first
+    result = supabase.table("users_game_ratings") \
+        .update(payload) \
+        .eq("user_id", user_id) \
+        .eq("game_id", game_id) \
+        .execute()
+
+    # If no rows updated, insert instead
+    if not result.data:
+        insert_payload = {
+            "user_id": user_id,
+            "game_id": game_id,
+            "rating": rating,
+            "created_at": datetime.utcnow().isoformat(),
+            "expires_at": expires_at.isoformat()
+        }
+        supabase.table("users_game_ratings").insert(insert_payload).execute()
+
+def get_ratings_for_game(game_id: int) -> List[Dict[str, Any]]:
+    result = supabase.table("users_game_ratings").select("rating").eq("game_id", game_id).execute()
+    return result.data or []
+
+
+
 
 # -----------------------
 # COLLECTION HELPERS
