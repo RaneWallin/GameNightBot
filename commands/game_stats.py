@@ -4,9 +4,11 @@ from helpers.supa_helpers import (
     search_games_fuzzy,
     get_sessions_for_game,
     get_winners_in_session,
-    get_users_by_ids
+    get_users_by_ids,
+    get_ratings_for_game
 )
 from collections import Counter
+from statistics import mean
 
 
 class ShareStatsButton(ui.View):
@@ -64,10 +66,16 @@ class GameSelectView(ui.View):
                     f"🏆 {id_to_name.get(uid, 'Unknown')} — {count} win(s)"
                     for uid, count in top_winners
                 )
+            # Ratings
+            ratings = get_ratings_for_game(self.game["id"])
+            avg_rating = round(mean(r["rating"] for r in ratings), 2) if ratings else None
+            rating_text = f"⭐ Average rating: **{avg_rating} / 5**\n" if avg_rating else ""
+
 
             content = (
                 f"📊 **Stats for {self.game['name']}**\n"
-                f"• 🎮 Total plays: **{total_plays}**\n"
+                f"🎮 Total plays: **{total_plays}**\n"
+                f"{rating_text}"
                 f"{winners_text}"
             )
 
