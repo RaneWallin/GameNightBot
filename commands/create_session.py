@@ -46,7 +46,7 @@ class SessionInfoModal(discord.ui.Modal, title="Session Info"):
             if session:
                 view = build_user_select_view(session["id"], self.server_id)
                 await interaction.response.send_message(
-                    f"✅ Session **{session.get('name', '(unnamed)')}** created for **{session.get('date', 'unspecified')}**!\nNow select players:",
+                    f"✅ Session {session.get('id', '(Error gettings id)')} **{session.get('name', '(unnamed)')}** created for **{session.get('date', 'unspecified')}**!\nNow select players:",
                     view=view,
                     ephemeral=True
                 )
@@ -123,7 +123,7 @@ def build_user_select_view(session_id: int, server_id: int):
                     pass
 
             await interaction.response.edit_message(
-                content=f"✅ Added {added} user(s) to the session!",
+                content=f"✅ Added {added} user(s) to session {session_id}!",
                 view=None
             )
 
